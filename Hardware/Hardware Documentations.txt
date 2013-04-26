@@ -1,0 +1,8 @@
+Gearmotor: http://www.pololu.com/catalog/product/1446
+Motor board: http://ruggedcircuits.com/html/rugged_motor_driver.html
+
+11.1V LiPo Battery: ?
+7.4V LiPo Battery: http://www.hobbypeople.net/index.php/hp-parts-battery-pack-dash-1m-7-4v-1000mah-lipo.html 
+
+USB shield: http://www.circuitsathome.com/products-page/arduino-shields/usb-host-shield-2-0-for-arduino/
+WiFi shield: http://www.cutedigi.com/wireless/wifi/linksprite-cuhead-wifi-shield-for-arduino.html

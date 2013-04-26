@@ -1,0 +1,29 @@
+1. Wire Library
+
+The I2C communication is not symmetric. There is a master and a slave that has to be determined beforehand.
+
+To start, I2C master calls Wire.begin() and that is it.
+I2C slave calls Wire.begin(slave_address), and registers receive callback and request callback using onReceive() and onRequest().
+
+To send data from master, beginTransmission(slave_address); Wire.write(data); endTransmission();
+To send data from slave, simply Wire.write(), which puts the data in the master's receive buffer.
+Note that each request callback can only initiate one Wire.write(), so if the data to be sent is large than 1 byte, must use Wire.write(ptr, num). At the master side, the number of calling Wire.write() is not constrained.
+
+To receive data from slave, master should issue requestFrom(address, numbytes), and then repeat data = Wire.read(). Wire.read() can read only one byte at each call.
+To receive data from master, slave simply call Wire.read().
+
+. Possible reasons for hanging a program
+* Type mismatch. The return value of Wire.write(data,num) is long, if assign it to a int, it will hang the program.
+* Serial.print() is asynchronous, meaning it returns before all data is transmitted. Sometimes a long string may cause problem. Use Serial.flush() to enforce synchronized buffer output. (Not confirmed).
+
+2. USB
+
+3. WiFi
+
+The library provided by LinkSprite is based on uip. It processes the communication by repeatedly calling socket_app_appcall() defined in socketapp.cpp. The uncommon use of switch-case construct in PSOCK macros provides a way of jumping directly into sending/reading the remains of last transmission/reception. 
+
+
+4. Arduino
+
+Floating point numbers are not exact, and may yield strange results when compared. For example 6.0 / 3.0 may not equal 2.0. You should instead check that the absolute value of the difference between the numbers is less than some small number. 
+

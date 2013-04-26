@@ -1,0 +1,42 @@
+function [co]=cost(x,y,i,j)
+global Mapp M
+%if Mapp(x,y)==0 || Mapp(i,j)==0
+%   cost=inf;
+%elseif x==i || y==j
+%        cost=10;
+%elseif i==x-1 && j==y-1 && Mapp(x,y-1)==1 && Mapp(x-1,y)==1  %these are made to avoid translational movement when cells around are occupied 
+%        cost=14;
+%elseif i==x-1 && j==y+1 && Mapp(x,y+1)==1 && Mapp(x-1,y)==1  
+%        cost=14;
+%elseif i==x+1 && j==y-1 && Mapp(x,y-1)==1 && Mapp(x+1,y)==1 
+%        cost=14;
+%elseif i==x+1 && j==y+1 && Mapp(x,y+1)==1 && Mapp(x+1,y)==1 
+%        cost=14;
+%end
+
+if Mapp(x,y)==1 || Mapp(i,j)==1
+   co=inf
+elseif i==x || y==j 
+    co=10
+elseif i==x-1 && j==y-1
+    if Mapp(x,y-1)==0 && Mapp(x-1,y)==0
+        co=14
+    end
+elseif i==x-1 && j==y+1 && Mapp(x,y+1)==0 && Mapp(x-1,y)==0
+    
+        co=14
+    elseif i==x+1 && j==y-1
+    if Mapp(x,y-1)==0 && Mapp(x+1,y)==0
+        co=14
+    end
+elseif i==x+1 && j==y+1
+    if Mapp(x,y+1)==0 && Mapp(x+1,y)==0
+        co=14
+    end
+else
+    co=inf
+end
+    
+
+    
+    

@@ -1,0 +1,219 @@
+#include "Simulator.h"
+
+using namespace Robotics;
+
+Simulator::Simulator() {
+	m_pLaser       = NULL;
+	m_pOdometer    = NULL;
+	m_lenScan      = 0;
+	m_aScan        = NULL;
+
+	m_odometry.p.x = 0.0;
+	m_odometry.p.y = 0.0;
+	m_odometry.phi = 0.0;
+}
+
+Simulator::~Simulator() {
+	delete[] m_aScan;
+
+	if (m_pLaser) {
+		fclose(m_pLaser);
+	}
+
+	if (m_pOdometer) {
+		fclose(m_pOdometer);
+	}
+}
+
+unsigned int Simulator::GetTimeSec() {
+	return m_timeSec;
+}
+
+unsigned int Simulator::GetTimeMsec() {
+	return m_timeMsec;
+}
+
+unsigned int Simulator::GetFrameNum() {
+	return m_frameNum;
+}
+
+bool Simulator::Open(const char *szFileLaser, const char *szFileOdometer) {
+	m_pLaser = fopen(szFileLaser, "r");
+
+	if (szFileOdometer) {
+		m_pOdometer = fopen(szFileOdometer, "r");
+	} else if (m_pLaser) {
+		char szFile[256];
+
+		strcpy(szFile, szFileLaser);
+
+		char *pStr = strchr(szFile, 'L');
+		*pStr = 'O';
+
+		m_pOdometer = fopen(szFile, "r");
+	}
+	
+	// Check the number of beams within one laser scan.
+	if (m_pLaser) {
+		double x, y;
+		
+		fscanf(m_pLaser, "%lf %lf", &x, &y);
+		
+		//for (m_lenScan = 0; fscanf(m_pLaser, "%lf", &y) && y < x; ++m_lenScan);
+		for (m_lenScan = 0; fscanf(m_pLaser, "%lf ", &y) && y < x; ++m_lenScan);		
+		
+		Rewind();
+		
+		delete[] m_aScan;
+		m_aScan = new int[m_lenScan];
+	}
+
+	switch (m_lenScan) {
+		case 541:
+			m_typeSensor = SickLms100;
+			break;
+		
+		case 361:
+			m_typeSensor = SickLms291;
+			break;
+			
+		case 769:
+		default:
+			m_typeSensor = HokuyoUrg04Lx;
+
+	}
+
+	//printf("Len Scan = %d\n", m_lenScan);
+
+	return (bool)m_pLaser;
+}
+
+bool Simulator::OpenLinsm(const char *szFileLaser, const char *szFileOdometer, const int laserType) {
+	m_pLaser = fopen(szFileLaser, "r");
+
+	if (szFileOdometer) {
+		m_pOdometer = fopen(szFileOdometer, "r");
+	} else if (m_pLaser) {
+		//char szFile[256];
+
+		//strcpy(szFile, szFileLaser);
+
+		//char *pStr = strchr(szFile, 'L');
+		//*pStr = 'O';
+
+		//m_pOdometer = fopen(szFile, "r");
+	}
+	
+	// Check the number of beams within one laser scan.
+	if (m_pLaser) {	
+		Rewind();
+	}
+
+	switch (laserType) {
+		case 0:
+			m_typeSensor = SickLms100;
+			m_lenScan = 541;
+			delete[] m_aScan;
+			m_aScan = new int[m_lenScan];
+			break;
+		
+		case 1:
+			m_typeSensor = SickLms291;
+			delete[] m_aScan;
+			m_lenScan = 361;
+			m_aScan = new int[m_lenScan];
+			break;
+			
+		case 2:
+		default:
+			delete[] m_aScan;
+			m_lenScan = 769;
+			m_aScan = new int[m_lenScan];
+			m_typeSensor = HokuyoUrg04Lx;
+
+	}
+
+	//printf("Len Scan = %d\n", m_lenScan);
+
+	return (bool)m_pLaser;
+}
+
+bool Simulator::Next() {
+	if (m_pLaser && !feof(m_pLaser)) {
+		if (m_pOdometer && !feof(m_pOdometer)) {
+			fscanf(m_pOdometer, "%d%d%lf%lf%lf", &m_timeSec, &m_timeMsec, &m_odometry.p.x, &m_odometry.p.y, &m_odometry.phi);
+		}
+
+		fscanf(m_pLaser, "%d%d", &m_timeSec, &m_timeMsec);
+
+		for (int i = 0; i < m_lenScan; i++) {
+			fscanf(m_pLaser, "%d", m_aScan+i);
+		}
+
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool Simulator::NextLinsm() {
+	if (m_pLaser && !feof(m_pLaser)) {
+		if (m_pOdometer && !feof(m_pOdometer)) {
+			fscanf(m_pOdometer, "%d%d%lf%lf%lf", &m_timeSec, &m_timeMsec, &m_odometry.p.x, &m_odometry.p.y, &m_odometry.phi);
+		}
+
+		fscanf(m_pLaser, "%d %E", &m_frameNum, &m_timeMsec);
+		m_timeSec = m_timeMsec / 1000;
+
+		//int tmp = 0; float tmp2 = 0;   // mark this if you dont use odometer
+		//fscanf(m_pLaser, "%d %d %f %d %d %f", &m_odometry.p.x, &m_odometry.p.y, &m_odometry.phi, &tmp, &tmp, &tmp2);
+
+		for (int i = 0; i < m_lenScan; i++) {
+			fscanf(m_pLaser, "%d", m_aScan+i);
+		}
+
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool Simulator::Rewind() {
+	if (m_pOdometer) {
+		rewind(m_pOdometer);
+	}
+	rewind(m_pLaser);
+	
+	return true;	
+}
+
+bool Simulator::Close() {
+	if (m_pLaser) {
+		fclose(m_pLaser);
+	}
+	if (m_pOdometer) {
+		fclose(m_pOdometer);
+	}
+
+	return (bool)!m_pLaser;
+}
+
+bool Simulator::GetScan(int *aScan) const {
+	memcpy(aScan, m_aScan, m_lenScan*sizeof(int));
+
+	return (bool)m_pLaser;
+}
+
+bool Simulator::GetOdometry(Geom2D::Pose &odometry) const {
+	odometry = m_odometry;
+
+	return (bool)m_pOdometer;
+}
+
+int Simulator::GetLenScan() const {
+	return m_lenScan;
+}
+
+TypeSensor Simulator::GetTypeSensor() const {
+	return m_typeSensor;	
+}

@@ -1,0 +1,64 @@
+function  [Aij,A,B,C,D,M,pathXY]=InitializationGrid(Mij,config)
+
+global Mov NC MapCost Mapp
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Mov=cell(2,4);
+NC=cell(2,4);
+
+Mov{1,2}=[0 0 -1 0 -1 +1;
+        -1 0 -1 +1 0 +1;
+        0 -1 -2 0 -1 2;
+        -1 -1 -2 1 0 2;];
+Mov{1,4}=-Mov{1,2};
+Mov{2,1}=[0 0 0 1 1 1;
+        0 1 1 1 1 0;
+        -1 0 0 2 2 1;
+        -1 1 1 2 2 0];
+Mov{2,3}=-Mov{2,1};
+
+NC{1,2}=[2 1 2;
+         3 2 1];
+NC{1,4}=[2 1 2;
+         1 4 3];
+NC{2,1}=[1 2 1;
+         2 1 4];
+NC{2,3}=[1 2 1;
+         4 3 2];
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if Mapp(Mij(1,1),Mij(1,2))==0
+    M=10;
+else
+    M=Inf;
+end
+
+if config(1)==1 && config(2)==2
+    Aij=Mij+[1,0];
+    Bij=Mij+[1,1];
+    Cij=Mij;
+    Dij=Mij+[0,1];
+    pathXY(1,:)=[-0.5 0];
+elseif config(1)==1 && config(2)==4
+    Aij=Mij+[0,1];
+    Bij=Mij;
+    Cij=Mij+[1,1];
+    Dij=Mij+[1,0];
+    pathXY(1,:)=[-0.5 0];
+elseif config(1)==2 && config(2)==1
+    Aij=Mij;
+    Bij=Mij+[1,0];
+    Cij=Mij+[0,1];
+    Dij=Mij+[1,1];
+    pathXY(1,:)=[0 0.5];
+else
+    Aij=Mij+[1,1];
+    Bij=Mij+[0,1];
+    Cij=Mij+[1,0];
+    Dij=Mij;
+    pathXY(1,:)=[0 0.5];
+end
+
+A=MapCost(Aij(1),Aij(2));
+B=MapCost(Bij(1),Bij(2));
+C=MapCost(Cij(1),Cij(2));
+D=MapCost(Dij(1),Dij(2));

@@ -1,0 +1,44 @@
+I. TO CREATE NEW ARDUINO PROJECT:
+
+1. Eclipse Preference -> Arduino -> Arduino:
+Set Arduino IDE path to point to the folder containing built-in "libraries"
+Set Private Library path to the folder containing non-built-in libraries.
+Check "Use Arduino IDE tools in eclipse"
+
+2. File -> New -> Project -> New Arduino Sketch -> Write sketch name, select board model, serial port, etc. You should see a new project appear in the Project Explorer, along with a project that includes code specific to the board model.
+
+3. Right click on project -> import libraries into the project. You will see build-in libraries and private libraries are separated. Select all libraries you want to import.
+
+4. Project Properties -> C/C++ Build ->  Settings -> AVR Compiler -> Directories should contain the following:
+"${workspace_loc:/${ARDUINOBOARDNAME}/arduino}"
+"${workspace_loc:/${ARDUINOBOARDNAME}/${ARDUINOBOARDVARIANT}}"
+"${workspace_loc:/${ProjName}/X}", where X is any library required by the program
+
+* Notice that for the Wire library, we need to include both:
+"${workspace_loc:/${ProjName}/Wire}"
+"${workspace_loc:/${ProjName}/Wire/utility}" for twi.h
+
+5. Do the same for AVR C++ Compiler.
+
+6. AVR C++ Linker -> Libraries ->
+Libraries (-I) should contain ${ARDUINOBOARDNAME}
+Libraries Path (-L) should contain "${workspace_loc:/${ARDUINOBOARDNAME}}/${ConfigName}"
+
+
+
+II. IMPORT EXISING ARDUINO PROJECTS
+
+1. Create a new Arduino project, as in I.1. Preferrably use the same name as the existing project, but this is not required if the paths in settings all use environment variable ${ProjName} rather than hardcoded project name.
+
+2. Import -> File System -> Browse, select existing project folder -> Check all files -> Uncheck "Create top-level folder" -> Confirm overwrite to all
+
+3. You can delete the irrelevant source files that are automatically generated with new prject creation.
+
+4. Clean, rebuild.
+
+
+III. TIPS
+
+Make Eclipse shortcut _1 for upload Arduino; _2 for build project
+
+

@@ -1,0 +1,57 @@
+/**
+ * Simulator
+ *  Simulate sensor and odometer readings from recorded files.
+ *  The number of beams within one laser scan can be detected automatically if not given.
+ */
+
+#ifndef __ROBOTICS_SIMULATOR_H__
+#define __ROBOTICS_SIMULATOR_H__
+
+#include "SensorModel.h"
+#include "geometry2D.hpp"
+#include <stdlib.h>
+
+namespace Robotics {
+
+	class Simulator {
+		public:
+			Simulator();
+			~Simulator();
+
+			bool Open(const char *szFileLaser, const char *szFileOdometer=NULL);
+			bool Next();
+			bool Rewind();
+			bool Close();
+			// 2010 03 18 added by linsm
+			bool OpenLinsm(const char *szFileLaser, const char *szFileOdometer, const int laserType);
+			bool NextLinsm();
+
+			unsigned int GetTimeSec();
+			unsigned int GetTimeMsec();
+			unsigned int GetFrameNum();
+
+			bool GetScan(int *aScan) const;
+			bool GetOdometry(Geom2D::Pose &odometry) const;
+			
+			int GetLenScan() const;
+
+			
+			TypeSensor GetTypeSensor() const;
+
+		private:
+			unsigned int m_timeSec;
+			unsigned int m_timeMsec;
+			unsigned int m_frameNum;
+			int          m_lenScan;
+			int         *m_aScan;
+			Geom2D::Pose m_odometry;
+			
+			TypeSensor   m_typeSensor;
+
+			FILE *m_pLaser;
+			FILE *m_pOdometer;
+	};
+	
+}
+
+#endif

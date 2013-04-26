@@ -1,0 +1,22 @@
+Mega <-> WiFi shield
+
+MEGA pin 50 (MISO) to WiFi Shield pin 12.
+MEGA pin 51 (MOSI) to  WiFi Shield pin 11.
+MEGA pin 52 (SCK) to  WiFi Shield pin 13.
+MEGA pin 53 (SS) to  WiFi Shield pin 10.
+
+Mega pin 19 to WiFiShield pin 2 (Wifi shield interrupt)
+
+Mega <-> Uno:
+
+Mega pin 20 to Uno pin A4 (SDA)
+Mega pin 21 to Uno pin A5 (SCL)
+
+Uno <-> Motor board
+
+Uno pin 0,1 are for uploading programs using serial cable, so should not connect.
+Uno pin A4,A5 reserved for I2C.
+RuggedCircuits motor board uses 3(PWM1), 12(DIR1), 11(PWM2), 13(DIR2)
+Empirically, pin 9 can not be used as digital pin, only use as PWM.
+
+

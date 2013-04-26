@@ -1,0 +1,71 @@
+* USB
+
+v1.2 corrects small bugs to be compatible with Arduino Eclipse plugin 1.2.2 and ARDUINO IDE 1.0.1.
+	
+The suspected reason for the bug is ARDUINO macro is not defined in Arduino IDE 1.0.1. It can be resolved by the following Perl script (not tested):
+
+find . -name '*.h' | xargs perl -pi -e 's/&& ARDUINO/&& defined(ARDUINO)/g'
+find . -name '*.cpp' | xargs perl -pi -e 's/&& ARDUINO/&& defined(ARDUINO)/g'
+
+v1.1 modified a pin mapping. SS (pin 10) is rewired to pin 7 because it conflicts with WiFi shield that also uses pin 10 as SS. (refer to http://www.circuitsathome.com/usb-host-shield-hardware-manual, section 5. Interface modifications)
+
+In Usb.h, change
+typedef MAX3421e<P10, P9>		MAX3421E; to
+typedef MAX3421e<P7, P9>		MAX3421E;
+
+v1 removes headers that are not useful but generate a lot of warnings, reduces compile time.
+
+
+
+
+* WiFiMega (Refer to http://www.linksprite.com/article/shownews.php?lang=en&id=106, with slight difference)
+
+1. In socketapp.cpp, wrap "include"s from Wifi library with extern "C"
+
+2. Make the following changes to spi.h (in hardware\libraries\wishield):
+
+#define SPI0_SS_BIT							BIT0            
+...
+#define SPI0_SCLK_BIT						BIT1
+...
+#define SPI0_MOSI_BIT						BIT2
+...
+#define SPI0_MISO_BIT						BIT3
+...
+#define SPI0_Init()							PRR0 = 0x00;\
+											DDRB  |= SPI0_SS_BIT|SPI0_SCLK_BIT|SPI0_MOSI_BIT|LEDConn_BIT;\
+											DDRB  &= ~SPI0_MISO_BIT;\
+											PORTB = SPI0_SS_BIT;\
+											SPCR  = 0x50;\
+											SPSR  = 0x01
+
+...
+#define ZG2100_CS_BIT						BIT0
+...
+#define LEDConn_BIT							BIT5            
+
+3. In WiShield.cpp and WiServer.cpp, change attachInterrupt(0, zg_isr, LOW) to attachInterrupt(4, zg_isr, LOW). The referred instructions suggest using interrupt 2 which is pin 21 on Mega. But we need to use it as I2C SCL pin. So now WiFi uses interrupt 4 which is pin 19, and we also need to connect WiFiShield pin 2 to Mega pin 19.
+
+4. Bend pins 2,10,11,12,13 on WiFi shield or turn them into high-impedance inputs:
+
+pinMode(2, INPUT);
+pinMode(10, INPUT);
+pinMode(11, INPUT);
+pinMode(12, INPUT);
+pinMode(13, INPUT);
+
+Changing pin mode does not work because this will affect the USB shield that is using these pins. 
+
+5. Modify uip-conf.h to increase maximum segment size
+#define UIP_CONF_BUFFER_SIZE     1000
+
+Also beware of UIP_TCP_MSS
+
+6. To make WiFi work together with I2C, the following has to be changed in spi.h:
+
+#define ZG2100_ISR_DISABLE()      (EIMSK &= ~(0x10))
+#define ZG2100_ISR_ENABLE()      (EIMSK |= 0x10)
+
+7. In socketapp.h, increase input buffer size from 20 to 50.
+
+

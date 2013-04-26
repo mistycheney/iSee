@@ -1,0 +1,44 @@
+function  Initialize
+
+global U M MM start km goal Mapp
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+msize=size(Mapp);
+km=0;
+costii=zeros(8,1);
+M=cell(msize(1),msize(2));
+for i=1:msize(1)
+    for j=1:msize(2)
+M{i,j}=[inf, inf];
+    end
+end
+M{goal(1),goal(2)}(2)=0;
+costii=[];
+for i=1:msize(2)
+    for j=1:msize(1)
+        list=ar8(i,j); %intanto ci teniamo a distanza 1 poi casomai si modifica la ar8 per fornire liste giuste.
+        [idx,idy]=size(list)
+        for ii=1:idx
+           costii(ii)=cost(i,j,list(ii,1),list(ii,2)); 
+        end
+        costii
+        MM{i,j}=[list,costii'];
+        costii=[];
+        list=[];
+    end
+end
+
+%for i=1:msize(2)-1:msize(2)
+%    for j=1:msize(1)
+%        list=ar8(i,j); %intanto ci teniamo a distanza 1 poi casomai si modifica la ar8 per fornire liste giuste.
+%        list(list(:,1)==0 | list(:,2)==0 | list(:,2)==(msize(2)+1) | list(:,1)==(msize(1)+1))=[];
+%        [x,y]=size(list);
+%        for ii=1:x
+%           costi(i)=cost(i,j,list(ii,1),list(ii,2)); 
+%        end
+%        MM{i,j}=[list,costi];
+%        costi=[];
+%    end
+%end
+                
+U=[distance(start(1),start(2),goal(1),goal(2)),goal(1),goal(2)];
+

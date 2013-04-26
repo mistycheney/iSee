@@ -1,0 +1,72 @@
+/* Iterated closest point (ICP) algorithm.
+ * 
+ * This is a very simple implementation of ICP, with one simple extension where the
+ * association may be chosen as an interpolation between two nearest neighbours rather
+ * than just point-to-point with the nearest neighbour.
+ *
+ * A lot of extensions to this basic algorithm are possible. For example,
+ *	1. Record at each iteration the set of NN associations for each observation. 
+ *	If these do not change, then ICP has converged completely.
+ *	
+ *	2. Various speed ups given in the following papers:
+ *
+ *	(a) P.J. Besl and N.D. McKay. A method for registration of 3-D shapes. IEEE 
+ *	Transactions on Pattern Analysis and Machine Intelligence, 14(2):239?56, 1992.
+ *
+ *	(b) F. Lu and E. Milios. Robot pose estimation in unknown environments by matching
+ *	2D range scans. Journal of Intelligent and Robotic Systems, 18:249?75, 1997.
+ *
+ *	(c) S. Rusinkiewicz and M. Levoy. Efficient variants of the ICP algorithm. In Third
+ *	International Conference on 3D Digital Imaging and Modeling, pages 145?52, 2001.
+ *
+ *	3. Methods for estimating the error introduced by point-wise correspondence in 
+ *	the paper (b) above and also:
+ *
+ *	S.T. P?ster, K.L. Kriechbaum, S.I. Roumeliotis, and J.W. Burdick. Weighted range
+ *	sensor matching algorithms for mobile robot displacement estimation. In IEEE 
+ *	International Conference on Robotics and Automation, 2002.
+ *
+ * Tim Bailey 2004.
+
+ // Use the opencv Kd-tree implementation 
+ */
+
+#include "geometry2D.hpp"
+#include "nn.hpp"
+#include <memory>
+
+// opencv flann dependency
+#include "opencv/cv.h"
+#include "opencv/cxcore.h"
+#include "opencv/highgui.h"
+
+namespace Geom2D {
+
+class ICP {
+public:
+	ICP::ICP(const std::vector<Point>& reference, const double& gate,bool isKdtree);
+	ICP::~ICP();
+
+	// Align observe point-set to reference point-set
+	Pose ICP::align(const std::vector<Point>& observe, const Pose& init, 
+		double gate, int iterations, bool interpolate=false, double convergence = 0.5*1e-4);
+
+	// Get associated points after alignment step
+	const std::vector<Point>& get_points_ref() { return b; }
+	const std::vector<Point>& get_points_obs() { return a; }
+
+	// set the gating for the nearest neighbor search
+	void setNNGate(const double& gate);
+
+private:
+	const std::vector<Point>&  ref;
+	std::auto_ptr<SweepSearch> nn;
+	cv::flann::Index*          kdtree;
+	std::vector<cv::Point2f>   refCvPts;
+	cv::Mat                    refMat;
+
+	std::vector<Point> a;
+	std::vector<Point> b;
+};
+
+} // namespace Geom2D 

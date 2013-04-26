@@ -1,0 +1,4 @@
+superSerial	KEYWORD1
+sSerial	KEYWORD1
+readInt	KEYWORD1
+readFloat KEYWORD1
